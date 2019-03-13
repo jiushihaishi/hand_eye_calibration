@@ -47,7 +47,13 @@ if __name__ == "__main__":
            'file that is needed for the optimization step.')
   parser.add_argument(
       '--calibration_output_json_file', type=str,
-      help='Calibration output file. Contains the result of the '
+      help='Calibration output json file. Contains the result of the '
+           'dual-quaternion-based hand eye calibration and time alignment. '
+           'Is used as a initial guess for the batch estimation.')
+
+  parser.add_argument(
+      '--calibration_output_yaml_file', type=str,
+      help='Calibration output yaml file. Contains the result of the '
            'dual-quaternion-based hand eye calibration and time alignment. '
            'Is used as a initial guess for the batch estimation.')
 
@@ -150,9 +156,11 @@ if __name__ == "__main__":
 
   output_json_calibration = args.calibration_output_json_file is not None
   has_time_offset_file = args.time_offset_input_csv_file is not None
-  if output_json_calibration and has_time_offset_file:
+  output_yaml_calibration = args.calibration_output_yaml_file is not None
+  if output_json_calibration or output_yaml_calibration and has_time_offset_file:
     time_offset = float(readArrayFromCsv(
         args.time_offset_input_csv_file)[0, 0])
     calib = ExtrinsicCalibration(
         time_offset, DualQuaternion.from_pose_vector(dq_H_E.to_pose()))
-    calib.writeJson(args.calibration_output_json_file)
+    #calib.writeJson(args.calibration_output_json_file)
+    calib.writeYaml(args.calibration_output_yaml_file)

@@ -2,6 +2,7 @@ import os
 import json
 import numpy as np
 from hand_eye_calibration.dual_quaternion import DualQuaternion
+import yaml
 
 class ExtrinsicCalibration:
   def __init__(self, time_offset, pose_dual_quat):
@@ -11,7 +12,7 @@ class ExtrinsicCalibration:
   def writeJson(self, out_file, switchConvention = False):
     pose = self.pose_dq.to_pose()
     if switchConvention:
-      pose[3:6] *= -1.0; # convert to JPL
+      pose[3:6] *= -1.0 # convert to JPL
     calib = { 
       'delay' : self.time_offset, 
       'rotation' : { name : float(pose[i + 3]) for i, name in enumerate('ijkw') },
@@ -19,6 +20,19 @@ class ExtrinsicCalibration:
     }
     with open(out_file, 'w') as f:
       json.dump(calib, f, indent = 3, sort_keys=True)
+
+  def writeYaml(self, out_file, switchConvention = False):
+    pose = self.pose_dq.to_pose()
+    if switchConvention:
+      pose[3:6] *= -1.0
+    calib = {
+      'quanternion' :{ name : float(pose[i + 3]) for i, name in enumerate('ijkw') },
+      'translation' :{ name : float(pose[i]) for i, name in enumerate('xyz') },
+      'offset' : self.time_offset
+    }
+    configOut = yaml.dump(calib)
+    configFile = open(out_file, 'w')
+    configFile.write(configOut)
 
   @classmethod
   def fromJson(cls, in_file, switchConvention = False):
