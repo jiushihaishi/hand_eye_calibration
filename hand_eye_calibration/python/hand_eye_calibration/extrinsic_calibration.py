@@ -9,26 +9,30 @@ class ExtrinsicCalibration:
     self.time_offset = time_offset
     self.pose_dq = pose_dual_quat
 
-  def writeJson(self, out_file, switchConvention = False):
+  def writeJson(self, out_file, camera, switchConvention = False):
     pose = self.pose_dq.to_pose()
     if switchConvention:
       pose[3:6] *= -1.0 # convert to JPL
-    calib = { 
-      'delay' : self.time_offset, 
-      'rotation' : { name : float(pose[i + 3]) for i, name in enumerate('ijkw') },
-      'translation' : { name : float(pose[i]) for i, name in enumerate('xyz') }
+    calib = {
+      camera: {
+      'timeOffset' : self.time_offset, 
+      'q(x,y,z,w)' : [ float(pose[i + 3]) for i, name in enumerate('xyzw') ],
+      't(x,y,z)metres' : [ float(pose[i]) for i, name in enumerate('xyz') ]
+      }
     }
     with open(out_file, 'w') as f:
       json.dump(calib, f, indent = 3, sort_keys=True)
 
-  def writeYaml(self, out_file, switchConvention = False):
+  def writeYaml(self, out_file, camera, switchConvention = False):
     pose = self.pose_dq.to_pose()
     if switchConvention:
       pose[3:6] *= -1.0
     calib = {
-      'quanternion' :{ name : float(pose[i + 3]) for i, name in enumerate('ijkw') },
-      'translation' :{ name : float(pose[i]) for i, name in enumerate('xyz') },
-      'offset' : self.time_offset
+      camera: {
+      'timeOffset' : self.time_offset, 
+      'q(x,y,z,w)' : [ float(pose[i + 3]) for i, name in enumerate('xyzw') ],
+      't(x,y,z)metres' : [ float(pose[i]) for i, name in enumerate('xyz') ]
+      }
     }
     configOut = yaml.dump(calib)
     configFile = open(out_file, 'w')

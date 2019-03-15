@@ -40,7 +40,9 @@ if __name__ == "__main__":
   parser.add_argument(
       '--extrinsics_output_csv_file', type=str,
       help='Write estimated extrinsics to this file in spatial-extrinsics csv format')
-
+  parser.add_argument(
+      '--camera', type=str,
+      help='the number of camera in handeye calibration')
   parser.add_argument(
       '--time_offset_input_csv_file', type=str,
       help='Time offset input file. Is used to construct the calibration json '
@@ -163,4 +165,4 @@ if __name__ == "__main__":
     calib = ExtrinsicCalibration(
         time_offset, DualQuaternion.from_pose_vector(dq_H_E.to_pose()))
     #calib.writeJson(args.calibration_output_json_file)
-    calib.writeYaml(args.calibration_output_yaml_file)
+    calib.writeYaml(args.calibration_output_yaml_file, args.camera)
